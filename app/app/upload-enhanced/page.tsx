@@ -144,7 +144,9 @@ export default function EnhancedUploadPage() {
       files.forEach((file) => formData.append("files", file))
 
       try {
-        const response = await fetch("/api/upload", {
+        // Use Flask backend API
+        const FLASK_API_URL = process.env.NEXT_PUBLIC_FLASK_API_URL || 'http://localhost:5000'
+        const response = await fetch(`${FLASK_API_URL}/api/upload`, {
           method: "POST",
           body: formData,
         })
@@ -184,7 +186,7 @@ export default function EnhancedUploadPage() {
           )
         }
       } catch (err: any) {
-        const message = `Network error: ${err.message}`
+        const message = `Network error: ${err.message}. Make sure Flask server is running on port 5000.`
         setError(message)
         files.forEach((file) =>
           upsertProgress(file.name, {
