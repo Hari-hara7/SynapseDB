@@ -108,7 +108,7 @@ export default function QueryPage() {
                 </Button>
                 {result && (
                   <span className="flex items-center gap-2 text-xs uppercase tracking-[0.35em] text-white/40">
-                    <Sparkles className="size-3" /> {result.response_time}
+                    <Sparkles className="size-3" /> Search completed in {result.response_time}
                   </span>
                 )}
               </div>

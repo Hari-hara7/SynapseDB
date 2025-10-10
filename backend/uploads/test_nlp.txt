@@ -1,0 +1,21 @@
+⿡ User/Order Queries
+Show all orders placed by Alice.
+List the top 3 users with the highest total order value.
+Find all products ordered more than twice.
+List the orders with total greater than 1000.
+
+⿢ Product Queries
+Show all products priced above 500.
+List the most popular product based on quantity sold.
+Find total sales for each product.
+
+⿣ Aggregation / Analytics
+Number of orders per user.
+Total revenue per month.
+Average order total for each user.
+Top 5 products by revenue.
+
+⿤ Join / Complex Queries
+Show all orders with user name and product names included.
+Find users who bought both Laptop and Phone.
+List orders where total is greater than average order total.

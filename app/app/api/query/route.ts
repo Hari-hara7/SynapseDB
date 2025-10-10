@@ -24,11 +24,11 @@ export async function POST(req: NextRequest) {
         LIMIT 10
       `, [`%${query}%`])
       
-      const responseTime = (Date.now() - start) / 1000
+  const responseTime = ((Date.now() - start) / 1000).toFixed(2)
       
       return NextResponse.json({
         type: 'DOCUMENT_SEARCH',
-        response_time: `${responseTime}s`,
+  response_time: `${responseTime}s`,
         query: query,
         results: searchResult.rows,
         count: searchResult.rows.length

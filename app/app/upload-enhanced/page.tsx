@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useMemo, useRef, useState } from "react"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import Link from "next/link"
 import {
   ArrowUpRight,
@@ -77,13 +77,51 @@ const formatSize = (bytes = 0) => {
 }
 
 export default function EnhancedUploadPage() {
+  const flaskApiBase = useMemo(() => {
+    const fallback = "http://localhost:5000"
+    const raw = process.env.NEXT_PUBLIC_FLASK_API_URL?.trim() || fallback
+    return raw.replace(/\/$/, "")
+  }, [])
+
   const [files, setFiles] = useState<File[]>([])
   const [progress, setProgress] = useState<UploadProgress[]>([])
   const [result, setResult] = useState<any>(null)
   const [error, setError] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [apiStatus, setApiStatus] = useState<"checking" | "online" | "offline">("checking")
+  const [apiMessage, setApiMessage] = useState("Checking Flask backend…")
   const fileInputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    const controller = new AbortController()
+    const checkHealth = async () => {
+      try {
+        setApiStatus("checking")
+        setApiMessage("Checking Flask backend…")
+        const response = await fetch(`${flaskApiBase}/api/health`, {
+          signal: controller.signal,
+          cache: "no-store",
+        })
+        if (!response.ok) throw new Error(`Status ${response.status}`)
+        const data = await response.json()
+        setApiStatus("online")
+        setApiMessage(
+          `Online • ${new Intl.NumberFormat().format(data.allowed_extensions?.length ?? 0)} file types allowed`
+        )
+      } catch (err) {
+        if (controller.signal.aborted) return
+        setApiStatus("offline")
+        setApiMessage(
+          `Cannot reach Flask backend at ${flaskApiBase}. Start it with \"python app.py\" from the backend folder.`
+        )
+      }
+    }
+
+    void checkHealth()
+
+    return () => controller.abort()
+  }, [flaskApiBase])
 
   const upsertProgress = useCallback((fileName: string, updates: Partial<UploadProgress>) => {
     setProgress((prev) => {
@@ -145,8 +183,7 @@ export default function EnhancedUploadPage() {
 
       try {
         // Use Flask backend API
-        const FLASK_API_URL = process.env.NEXT_PUBLIC_FLASK_API_URL || 'http://localhost:5000'
-        const response = await fetch(`${FLASK_API_URL}/api/upload`, {
+        const response = await fetch(`${flaskApiBase}/api/upload`, {
           method: "POST",
           body: formData,
         })
@@ -186,7 +223,7 @@ export default function EnhancedUploadPage() {
           )
         }
       } catch (err: any) {
-        const message = `Network error: ${err.message}. Make sure Flask server is running on port 5000.`
+        const message = `Network error: ${err.message}. Make sure the Flask server is running at ${flaskApiBase}.`
         setError(message)
         files.forEach((file) =>
           upsertProgress(file.name, {
@@ -217,6 +254,15 @@ export default function EnhancedUploadPage() {
     const failed = progress.filter((p) => p.status === "error").length
     return { success, failed }
   }, [progress])
+  const apiStatusStyles = useMemo(
+    () =>
+      ({
+        checking: "border-white/15 bg-white/5 text-white/60",
+        online: "border-emerald-500/40 bg-emerald-500/10 text-emerald-200",
+        offline: "border-rose-500/40 bg-rose-500/10 text-rose-200",
+      }[apiStatus]),
+    [apiStatus]
+  )
 
   return (
     <div className="relative min-h-screen overflow-hidden bg-black text-white">
@@ -239,9 +285,25 @@ export default function EnhancedUploadPage() {
         </header>
 
         <main className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
-          <Card className="border-white/15 bg-white/[0.02]">
+          <Card className="border-white/10 bg-white/[0.03]">
             <CardGradient />
             <CardContent className="space-y-8">
+              <div
+                className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-xs font-medium transition ${
+                  apiStatusStyles ?? "border-white/15 bg-white/5 text-white/60"
+                }`}
+              >
+                <span>
+                  {apiStatus === "checking" && "Checking Flask backend…"}
+                  {apiStatus === "online" && "Flask backend connected"}
+                  {apiStatus === "offline" && "Flask backend offline"}
+                </span>
+                <span className="text-right text-[10px] uppercase tracking-[0.25em] text-white/50">
+                  {apiStatus === "offline" ? "Offline" : apiStatus === "online" ? "Live" : "Checking"}
+                </span>
+              </div>
+              <p className="text-[11px] text-white/40">{apiMessage}</p>
+
               <div className="space-y-4">
                 <Badge className="border-white/20 bg-white/10 text-white/80">
                   Upload Studio
@@ -319,6 +381,23 @@ export default function EnhancedUploadPage() {
           <Card className="border-white/10 bg-white/[0.03]">
             <CardGradient />
             <CardContent className="space-y-6">
+              <div
+                className={`flex items-center justify-between rounded-2xl border px-4 py-3 text-xs font-medium transition ${{
+                  checking: "border-white/15 bg-white/5 text-white/60",
+                  online: "border-emerald-500/40 bg-emerald-500/10 text-emerald-200",
+                  offline: "border-rose-500/40 bg-rose-500/10 text-rose-200",
+                }[apiStatus]}`}
+              >
+                <span>
+                  {apiStatus === "checking" && "Checking Flask backend…"}
+                  {apiStatus === "online" && "Flask backend connected"}
+                </span>
+                <span className="text-right text-[10px] uppercase tracking-[0.25em] text-white/50">
+                  {apiStatus === "offline" ? "Offline" : "Live"}
+                </span>
+              </div>
+              <p className="text-[11px] text-white/40">{apiMessage}</p>
+
               <div className="flex items-center justify-between text-sm text-white/60">
                 <span className="inline-flex items-center gap-2">
                   <CheckCircle2 className="size-4" />

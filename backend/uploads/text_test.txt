@@ -1,0 +1,23 @@
+Employee Name John Doe
+Position Software Engineer
+Department Technology
+Start Date 1st November 2025
+Salary $75,000 per annum
+Reporting Manager Jane Smith
+Dear John Doe,
+We are pleased to offer you the position of Software Engineer at Acme Tech Solutions.
+Your start date will be November 1st, 2025. You will be reporting directly to Jane Smith, Head of Technology.
+Your annual compensation will be $75,000, paid monthly. Additional benefits include
+- Health insurance for you and your dependents
+- Paid time off 20 days per year
+- 401(k) retirement plan
+Your responsibilities will include
+1. Developing and maintaining software applications
+2. Collaborating with cross-functional teams to deliver high-quality solutions
+3. Participating in code reviews and technical discussions
+4. Ensuring software meets performance, security, and scalability requirements
+Please review this offer carefully and confirm your acceptance by signing below. We look forward to welcoming you to our team.
+Sincerely,
+Jane Smith
+Head of Technology
+Acme Tech Solutions

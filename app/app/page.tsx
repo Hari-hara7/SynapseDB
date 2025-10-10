@@ -72,9 +72,17 @@ const primaryLinks = [
   title: "Natural Language Query System",
   description:
     "Convert user questions into dynamic SQL queries that adapt to your database schema in real-time using Gemini Flash 2.5 and Prisma.",
+  href: "/query-generator",
+  icon: Database,
+},
+{
+  title: "AI Query Interface",
+  description:
+    "Ask natural language questions, auto-generate SQL queries, and visualize live database results with performance metrics — powered by Gemini 2.5 Flash, FastAPI, and Prisma.",
   href: "/query-interface",
   icon: Database,
 },
+
 
  
 
@@ -183,22 +191,12 @@ export default function Home() {
         <div className="absolute bottom-[-30%] right-[-10%] h-[420px] w-[420px] rounded-full bg-gradient-to-tr from-purple-600/40 via-fuchsia-500/10 to-transparent blur-3xl" />
       </div>
 
-      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-16 px-6 pb-20 pt-12 sm:px-10">
-        <header className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <Link href="/" className="flex items-center gap-2 text-lg font-medium text-white/80">
-              <span className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/20 bg-white/10 text-sm font-semibold">
-                SD
-              </span>
-              SynapseDB
-            </Link>
-          </div>
-          <div className="flex items-center gap-3 text-sm text-white/60">
-            <span>Ask anything about your workforce.</span>
-            <div className="hidden h-4 w-px bg-white/10 sm:block" />
-            <span>Instant answers. Zero dashboards.</span>
-          </div>
-        </header>
+      <div className="mx-auto flex min-h-screen w-full max-w-6xl flex-col gap-16 px-6 pb-20 pt-8 sm:px-10">
+        <div className="flex items-center gap-3 text-sm text-white/60 justify-center">
+          <span>Ask anything about your workforce.</span>
+          <div className="hidden h-4 w-px bg-white/10 sm:block" />
+          <span>Instant answers. Zero dashboards.</span>
+        </div>
 
         <main className="flex flex-col gap-16">
           <section className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">

@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useCallback, useEffect, useMemo, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Link from "next/link"
 import { Card, CardContent, CardGradient } from "@/components/ui/card"
@@ -25,6 +25,24 @@ const SAMPLE_PROMPTS: string[] = [
   "Compare remote vs office employees grouped by performance rating and location",
 ]
 
+function formatSQL(sql: string) {
+  if (!sql) return ""
+
+  const cleaned = sql.replace(/\s+/g, " ").trim()
+
+  const withBreaks = cleaned.replace(
+    /\b(SELECT|FROM|WHERE|GROUP BY|ORDER BY|HAVING|LIMIT|OFFSET|JOIN|INNER JOIN|LEFT JOIN|RIGHT JOIN|FULL OUTER JOIN|FULL JOIN|CROSS JOIN|UNION ALL|UNION|ON|AND|OR)\b/gi,
+    (match) => `\n${match.toUpperCase()}`,
+  )
+
+  return withBreaks
+    .replace(/^[\n\s]+/, "")
+    .replace(/\n(AND|OR)\b/g, "\n  $1")
+    .replace(/\nON\b/g, "\n  ON")
+    .replace(/\n(JOIN|INNER JOIN|LEFT JOIN|RIGHT JOIN|FULL OUTER JOIN|FULL JOIN|CROSS JOIN)\b/g, "\n  $1")
+    .trim()
+}
+
 export default function QueryGeneratorPage() {
   const searchParams = useSearchParams()
 
@@ -37,6 +55,8 @@ export default function QueryGeneratorPage() {
   const [error, setError] = useState<string | null>(null)
   const [loading, setLoading] = useState(false)
   const [copied, setCopied] = useState(false)
+
+  const formattedSql = useMemo(() => formatSQL(sql), [sql])
 
   // Prefill from URL
   useEffect(() => {
@@ -210,7 +230,7 @@ export default function QueryGeneratorPage() {
               </div>
 
               {sql ? (
-                <pre className="max-h-[280px] overflow-auto rounded-2xl border border-white/10 bg-black/40 p-4 text-xs text-white/80">{sql}</pre>
+                <pre className="max-h-[280px] overflow-auto rounded-2xl border border-white/10 bg-black/40 p-4 text-xs text-white/80 whitespace-pre-wrap">{formattedSql}</pre>
               ) : (
                 <div className="rounded-2xl border border-dashed border-white/15 bg-white/5 p-6 text-sm text-white/50">
                   Generate to preview sanitized SQL with prepared parameters. Mutating statements are blocked.

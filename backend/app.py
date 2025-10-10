@@ -8,8 +8,8 @@ from werkzeug.utils import secure_filename
 # initialize the flask app
 app = Flask(__name__)
 
-# Enable CORS for Next.js frontend
-CORS(app, resources={r"/api/*": {"origins": ["http://localhost:3000", "http://localhost:3003"]}})
+# Enable CORS for Next.js frontend (allow all dev origins)
+CORS(app, resources={r"/api/*": {"origins": "*"}}, supports_credentials=True)
 
 # configure the upload folder
 UPLOAD_FOLDER = 'uploads'
