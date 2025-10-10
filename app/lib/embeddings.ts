@@ -12,17 +12,20 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
   if (!GEMINI_API_KEY) throw new Error('GEMINI_API_KEY is not set in environment')
   if (!texts || texts.length === 0) return []
 
-  const payload = {
-    model: 'models/embedding-001',
-    contents: texts.map((t) => ({ parts: [{ text: t }] })),
-  }
+  // Gemini embedding API expects a batch request with requests array
+  const requests = texts.map((text) => ({
+    model: 'models/text-embedding-004',
+    content: {
+      parts: [{ text }]
+    }
+  }))
 
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/embedding-001:embedContent?key=${GEMINI_API_KEY}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:batchEmbedContents?key=${GEMINI_API_KEY}`,
     {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ requests }),
     }
   )
 
@@ -33,26 +36,10 @@ export async function generateEmbeddings(texts: string[]): Promise<number[][]> {
 
   const data = await res.json()
 
-  const raw = data?.embeddings ?? data?.embedding ?? null
-  if (!raw || !Array.isArray(raw)) {
-    if (Array.isArray(data?.candidates)) {
-      const found: number[][] = []
-      for (const c of data.candidates) {
-        const parts = c?.content?.parts
-        if (Array.isArray(parts)) {
-          for (const p of parts) {
-            if (Array.isArray(p?.embedding)) found.push(p.embedding)
-          }
-        }
-      }
-      if (found.length > 0) return found
-    }
-    throw new Error('Invalid embedding response from Gemini')
+  // Extract embeddings from the response
+  if (data?.embeddings && Array.isArray(data.embeddings)) {
+    return data.embeddings.map((item: any) => item.values || [])
   }
 
-  return raw.map((item: any) => {
-    if (Array.isArray(item?.embedding)) return item.embedding
-    if (Array.isArray(item)) return item
-    return []
-  })
+  throw new Error('Invalid embedding response from Gemini: ' + JSON.stringify(data))
 }
